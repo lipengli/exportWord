@@ -1,21 +1,15 @@
 <?php
-class word
+class WordoneHelper
 { 
 	private $xmlns = '<html xmlns:o="urn:schemas-microsoft-com:office:office"
 		xmlns:w="urn:schemas-microsoft-com:office:word"
-		xmlns="http://www.w3.org/TR/REC-html40">';
+		xmlns="http://www.w3.org/TR/REC-html40"><head><xml><w:WordDocument><w:View>Print</w:View></xml></head>';
+	//<head><xml><w:WordDocument><w:View>Print</w:View></xml></head> 普通格式打开word  如果不加，则是web格式打开
 		
-	/**
-	*	构造函数
-	*/
-	
-	public function __construct(){
-
-	}
 	/**
 	*	无弹层提示start
 	*/
-	public function start()
+	private function start()
 	{
 		ob_start();
 		echo $this->xmlns;
@@ -24,7 +18,7 @@ class word
 	/**
 	*	无弹层提示保存
 	*/
-	public function save($path)
+	private function save($path)
 	{
 		echo "</html>";
 		$data = ob_get_contents();
@@ -38,7 +32,7 @@ class word
 	/**
 	*	无弹层提示保存
 	*/
-	function wirteFile($fn,$data)
+	private function wirteFile($fn,$data)
 	{
 		$fp=fopen($fn,"wb");
 		fwrite($fp,$data);
@@ -48,7 +42,7 @@ class word
 	/**
 	*	有弹层提示start
 	*/
-	public function flipStart($fileName = 'lpFuture.doc'){
+	private function flipStart($fileName = 'lpFuture.doc'){
 		ob_start();
 		header("Content-type: application/octet-stream;charset=gbk");
 		header("Accept-Ranges: bytes");
@@ -59,7 +53,7 @@ class word
 	/**
 	*	有弹层提示保存
 	*/
-	public function flipSave($path)
+	private function flipSave()
 	{
 		echo "</html>";
 		$data = ob_get_contents();
@@ -71,9 +65,24 @@ class word
 	/**
 	*	有弹层提示保存
 	*/
-	function flipWirteFile($data)
+	private function flipWirteFile($data)
 	{
 		echo $data;
+	}
+	
+	/**
+	*	外部使用方法：导出word
+	*	@params string $html 导出内容
+	*	@params string $path 导出的地址
+	*/
+	public function write($html,$path){
+		$wordname = time().rand(1,10).".doc"; 
+		$this->flipStart($wordname); 
+		//$html = "aaa".$i; 
+		echo $html; 
+		$this->flipSave(); 
+		ob_flush();//每次执行前刷新缓存 
+		flush(); 
 	}
 }
 
@@ -87,11 +96,5 @@ $html = '
 //批量生成 
 for($i=1;$i<=3;$i++){ 
     $word = new word(); 
-    $word->flipStart(); 
-    //$html = "aaa".$i; 
-    $wordname = time().$i.".doc"; 
-    echo $html; 
-    $word->flipSave($wordname); 
-    ob_flush();//每次执行前刷新缓存 
-    flush(); 
+    $word->write($html);
 }
